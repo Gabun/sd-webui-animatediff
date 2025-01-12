@@ -60,6 +60,8 @@ class AnimateDiffProcess:
         is_i2i_batch=False,
         video_default=False,
         prompt_scheduler=None,
+        step = None,
+        text_cond = None,
     ):
         self.model = model
         self.enable = enable
@@ -86,7 +88,8 @@ class AnimateDiffProcess:
         self.last_frame = last_frame
         self.latent_power_last = latent_power_last
         self.latent_scale_last = latent_scale_last
-
+        self.step = step
+        self.text_cond = text_cond
         # non-ui states
         self.request_id = request_id
         self.video_default = video_default

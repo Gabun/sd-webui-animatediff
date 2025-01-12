@@ -8,6 +8,7 @@ from modules import devices, shared
 from modules.script_callbacks import CFGDenoiserParams
 from scripts.animatediff_logger import logger_animatediff as logger
 from scripts.animatediff_mm import mm_animatediff as motion_module
+from scripts.animatediff_ui import AnimateDiffProcess
 
 
 class AnimateDiffInfV2V:
@@ -79,7 +80,7 @@ class AnimateDiffInfV2V:
 
     @staticmethod
     def animatediff_on_cfg_denoiser(cfg_params: CFGDenoiserParams):
-        ad_params = motion_module.ad_params
+        ad_params: AnimateDiffProcess = motion_module.ad_params
         if ad_params is None or not ad_params.enable:
             return
 
@@ -99,7 +100,8 @@ class AnimateDiffInfV2V:
 
             # prompt travel
             prompt_closed_loop = (ad_params.video_length > ad_params.batch_size) and (ad_params.closed_loop in ['R+P', 'A'])
-            ad_params.text_cond = ad_params.prompt_scheduler.multi_cond(cfg_params.text_cond, prompt_closed_loop)
+            if ad_params.prompt_scheduler:
+                ad_params.text_cond = ad_params.prompt_scheduler.multi_cond(cfg_params.text_cond, prompt_closed_loop)
             try:
                 from scripts.external_code import find_cn_script
                 cn_script = find_cn_script(cfg_params.denoiser.p.scripts)
@@ -171,6 +173,7 @@ class AnimateDiffInfV2V:
             logger.info("inner model forward hooked")
             cfg_params.denoiser.inner_model.original_forward = cfg_params.denoiser.inner_model.forward
             cfg_params.denoiser.inner_model.forward = MethodType(mm_sd_forward, cfg_params.denoiser.inner_model)
-
-        cfg_params.text_cond = ad_params.text_cond
-        ad_params.step = cfg_params.denoiser.step
+        #Something wrong here, seems not the expected type
+        if hasattr(ad_params, "text_cond") and hasattr(ad_params, "step"):
+            cfg_params.text_cond = ad_params.text_cond
+            ad_params.step = cfg_params.denoiser.step

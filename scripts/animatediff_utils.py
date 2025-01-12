@@ -66,7 +66,7 @@ def get_controlnet_units(p: StableDiffusionProcessing):
                         cn_unit_dataclass.batch_images = cn_unit_dict.get("batch_images", None)
                p.script_args[script.args_from:script.args_to] = cn_units_dataclass
 
-            return [x for x in cn_units if x.enabled] if not p.is_api else cn_units
+            return [x for x in cn_units if hasattr(x,"enabled") and x.enabled] if not p.is_api else cn_units
 
     return []
 
